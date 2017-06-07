@@ -20,6 +20,10 @@ var (
 	db   *xorm.Engine
 )
 
+const (
+	GB = 1024 * 1024 * 1024
+)
+
 func init() {
 
 	// Load config file
@@ -85,9 +89,9 @@ func main() {
 		// Update user package used
 		var bandwidth float32
 		if user.LastStatsTime == nil || user.LastStatsTime.Before(*startTime) {
-			bandwidth = float32(float64(raw) / 1024 / 1024)
+			bandwidth = float32(float64(raw) / GB)
 		} else {
-			bandwidth = float32(float64(raw-user.LastStatsResult) / 1024 / 1024)
+			bandwidth = float32(float64(raw-user.LastStatsResult) / GB)
 		}
 		user.PackageUsed += bandwidth
 
