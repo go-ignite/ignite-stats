@@ -58,6 +58,7 @@ func init() {
 }
 
 func main() {
+	log.Println("Start ...")
 	// 1. Load all service from user
 	users := []models.User{}
 	err := db.Where("service_id != ''").Find(&users)
@@ -101,7 +102,9 @@ func main() {
 		_, err = db.Id(user.Id).Cols("package_used", "last_stats_result", "last_stats_time").Update(user)
 		if err != nil {
 			log.Printf("Update user(%d) error: %s\n", user.Id, err.Error())
+			continue
 		}
 		log.Printf("user(%d-%s)-container(%s)-bandwidth(%.2f)\n", user.Id, user.Username, user.ServiceId, bandwidth)
 	}
+	log.Println("Done !")
 }
