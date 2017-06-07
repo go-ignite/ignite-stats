@@ -73,7 +73,7 @@ func main() {
 
 	// 2. Compute ss bandwidth
 	for _, user := range users {
-		raw, err := ss.StatsOutNet(user.ServiceId)
+		raw, err := ss.GetContainerStatsOutNet(user.ServiceId)
 		if err != nil {
 			log.Printf("Get container(%s) net out error: %s\n", user.ServiceId, err.Error())
 			continue
@@ -96,19 +96,26 @@ func main() {
 		user.PackageUsed += bandwidth
 
 		if int(user.PackageUsed) >= user.PackageLimit {
-			// TODO update user status?
+			// Stop container && update user status
+			err := ss.StopContainer(user.ServiceId)
+			if err != nil {
+				log.Println("Stop container(%s) error: %s\n", user.ServiceId, err.Error())
+			} else {
+				log.Printf("STOP: user(%d-%s)-container(%s)\n", user.Id, user.Username, user.ServiceId[:12])
+				user.Status = 2
+			}
 		}
 
 		// 3. Update user stats info
 		now := time.Now()
 		user.LastStatsTime = &now
 		user.LastStatsResult = raw
-		_, err = db.Id(user.Id).Cols("package_used", "last_stats_result", "last_stats_time").Update(user)
+		_, err = db.Id(user.Id).Cols("package_used", "last_stats_result", "last_stats_time", "status").Update(user)
 		if err != nil {
 			log.Printf("Update user(%d) error: %s\n", user.Id, err.Error())
 			continue
 		}
-		log.Printf("user(%d-%s)-container(%s)-bandwidth(%.2f)\n", user.Id, user.Username, user.ServiceId, bandwidth)
+		log.Printf("STATS: user(%d-%s)-container(%s)-bandwidth(%.2f)\n", user.Id, user.Username, user.ServiceId[:12], bandwidth)
 	}
 	log.Println("Done !")
 }
