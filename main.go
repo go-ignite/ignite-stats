@@ -103,6 +103,7 @@ func main() {
 			} else {
 				log.Printf("STOP: user(%d-%s)-container(%s)\n", user.Id, user.Username, user.ServiceId[:12])
 				user.Status = 2
+				user.PackageUsed = user.PackageLimit
 			}
 		}
 
