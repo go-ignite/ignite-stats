@@ -17,14 +17,20 @@ import (
 
 var (
 	conf = flag.String("c", "./config.toml", "config file")
+	mode = flag.String("m", "instant", "run mode")
 	db   *xorm.Engine
 )
 
 const (
-	GB = 1024 * 1024 * 1024
+	GB      = 1024 * 1024 * 1024
+	INSTANT = "instant"
+	DAILY   = "daily"
+	MONTHLY = "monthly"
 )
 
 func init() {
+	//Parse flag
+	flag.Parse()
 
 	// Load config file
 	if _, err := os.Stat(*conf); os.IsNotExist(err) {
@@ -62,7 +68,31 @@ func init() {
 }
 
 func main() {
-	log.Println("Start ...")
+	log.Println("Start with mode:", *mode)
+
+	switch *mode {
+	case INSTANT:
+		instantStats()
+	case DAILY:
+		dailyStats()
+	case MONTHLY:
+		monthlyStats()
+	default:
+		instantStats()
+	}
+
+	log.Println("Done !")
+}
+
+func dailyStats() {
+
+}
+
+func monthlyStats() {
+
+}
+
+func instantStats() {
 	// 1. Load all service from user
 	users := []models.User{}
 	err := db.Where("service_id != '' AND status != 2").Find(&users)
@@ -118,5 +148,4 @@ func main() {
 		}
 		log.Printf("STATS: user(%d-%s)-container(%s)-bandwidth(%.2f)\n", user.Id, user.Username, user.ServiceId[:12], bandwidth)
 	}
-	log.Println("Done !")
 }
