@@ -107,6 +107,8 @@ func dailyStats() {
 					log.Printf("Update user(%d) error: %s\n", user.Id, err.Error())
 					continue
 				}
+
+				log.Printf("Stop container:%s for user:%s \r\n", user.ServiceId, user.Username)
 			}
 		}
 	}
@@ -114,7 +116,33 @@ func dailyStats() {
 
 //monthlyStats: Restart stopped containers and restore the bandwidth.
 func monthlyStats() {
+	//1. Load all stopped services from users
+	users := []models.User{}
+	err := db.Where("service_id != '' AND status = 2").Find(&users)
+	if err != nil {
+		log.Println("Get users error: ", err.Error())
+		os.Exit(1)
+	}
 
+	//2. Restart stopped but not expired containers
+	for _, user := range users {
+		if user.Expired.After(time.Now()) {
+			err = ss.StartContainer(user.ServiceId)
+
+			if err == nil {
+				user.Status = 1
+				user.PackageUsed = 0
+				_, err = db.Id(user.Id).Cols("package_used", "status").Update(user)
+
+				if err != nil {
+					log.Printf("Update user(%d) error: %s\n", user.Id, err.Error())
+					continue
+				}
+
+				log.Printf("Start container:%s for user:%s \r\n", user.ServiceId, user.Username)
+			}
+		}
+	}
 }
 
 //instantStats: Instant task, check & update used bandwidth, stop containers which exceeded the package limit.
