@@ -65,7 +65,7 @@ func main() {
 	log.Println("Start ...")
 	// 1. Load all service from user
 	users := []models.User{}
-	err := db.Where("service_id != ''").Find(&users)
+	err := db.Where("service_id != '' AND status != 2").Find(&users)
 	if err != nil {
 		log.Println("Get users error: ", err.Error())
 		os.Exit(1)
@@ -103,6 +103,7 @@ func main() {
 			} else {
 				log.Printf("STOP: user(%d-%s)-container(%s)\n", user.Id, user.Username, user.ServiceId[:12])
 				user.Status = 2
+				user.PackageUsed = user.PackageLimit
 			}
 		}
 
