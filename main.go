@@ -143,6 +143,27 @@ func monthlyStats() {
 			}
 		}
 	}
+
+	//3. Load all running services from  users
+	runningUsers := []models.User{}
+	err = db.Where("service_id != '' AND status = 1").Find(&runningUsers)
+	if err != nil {
+		log.Println("Get users error: ", err.Error())
+		os.Exit(1)
+	}
+
+	//4. Reset used package for all running users
+	for _, ru := range runningUsers {
+		if ru.Expired.After(time.Now()) {
+			ru.PackageUsed = 0
+			_, err = db.Id(ru.Id).Cols("package_used").Update(ru)
+
+			if err != nil {
+				log.Printf("Update user(%d) error: %s\n", ru.Id, err.Error())
+				continue
+			}
+		}
+	}
 }
 
 //instantStats: Instant task, check & update used bandwidth, stop containers which exceeded the package limit.
