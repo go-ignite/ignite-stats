@@ -1,0 +1,10 @@
+# m h  dom mon dow   command
+# Daily task, check & stop expired containers every 2 minutes.
+*/2 * * * * /path/to/ignite-stats -c=/path/to/config.toml >> /path/to/stats.log 2>&1
+
+# Daily task, check & stop expired containers at 00:01.
+1 0 * * * /path/to/ignite-stats -c=/path/to/config.toml -m=daily >> /path/to/daily-stats.log 2>&1
+
+# Restart stopped containers and restore the bandwidth at 00:01 the first day of every month.
+1 0 1 * * /path/to/ignite-stats -c=/path/to/config.toml -m=monthly >> /path/to/monthly-stats.log 2>&1
+
