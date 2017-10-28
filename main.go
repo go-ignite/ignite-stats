@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"ignite/models"
-	"ignite/ss"
 	"log"
 	"os"
 	"time"
 
+	"github.com/go-ignite/ignite/models"
+	"github.com/go-ignite/ignite/ss"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/go-xorm/xorm"
